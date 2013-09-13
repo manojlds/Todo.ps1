@@ -3,9 +3,9 @@ Set-StrictMode -Version 2.0
 
 $TODO_DIR = $PSScriptRoot
 $TODO_TXT = Join-Path $TODO_DIR todo.txt
+$TODO_DONE_TXT = Join-Path $TODO_DIR done.txt
 $TODO_TXT_TEMP = Join-Path $TODO_DIR todo.txt.tmp
 $TODO_TXT_BACKUP = Join-Path $TODO_DIR todo.txt.bak
-
 
 function Write-Help {
     Write-Output "todo.ps1 help"
@@ -86,7 +86,21 @@ function t {
         Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
     }
 
+    if($command -eq "archive") {
+        $done = @()
+        Get-Content $TODO_TXT |  %{ 
+            if($_ -match "^x \d{4}-\d{2}-\d{2} ") {
+                $done += $_
+            } else {
+                $_
+            }
+        } | Out-File $TODO_TXT_TEMP -Encoding utf8
 
+        Move-Item $TODO_TXT $TODO_TXT_BACKUP -Force
+        Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
+
+        $done | Out-File $TODO_DONE_TXT -Encoding utf8
+    }
 }
  
 Export-ModuleMember -function t
