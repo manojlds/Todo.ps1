@@ -101,6 +101,21 @@ function t {
 
         $done | Out-File $TODO_DONE_TXT -Encoding utf8
     }
+
+    if($command -eq "dp") {
+        $lineCount = 0
+        Get-Content $TODO_TXT | %{
+            $lineCount++;
+            if($lineCount -ne $commandArgs[0]) {
+                $_
+            } else {
+                $_ -replace "^\([A-Z]\) ", ""
+            }
+        } | Out-File $TODO_TXT_TEMP -Encoding utf8
+
+        Move-Item $TODO_TXT $TODO_TXT_BACKUP -Force
+        Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
+    }
 }
  
 Export-ModuleMember -function t
