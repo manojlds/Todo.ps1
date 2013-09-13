@@ -42,8 +42,7 @@ function t {
 
     if($command -eq "ls") {
         $lineCount = 0
-        Get-Content $TODO_TXT | %{
-            $lineCount++
+        Get-Content $TODO_TXT | %{ $lineCount++; $_} | ?{ $_ -notmatch "^x \d{4}-\d{2}-\d{2} " } | %{
             $todo = $_
 
             $filtered = $commandArgs | ?{ $todo -match $_; }
@@ -69,6 +68,22 @@ function t {
         Move-Item $TODO_TXT $TODO_TXT_BACKUP -Force
         Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
 
+    }
+
+    if($command -eq "do") {
+        $lineCount = 0
+        Get-Content $TODO_TXT | %{
+            $lineCount++;
+            if($lineCount -ne $commandArgs[0]) {
+                $_
+            } else {
+                $dateDone = Get-Date
+                "x {0:yyyy-mm-dd} {1}" -f ($dateDone, $_)
+            }
+        } | Out-File $TODO_TXT_TEMP -Encoding utf8
+
+        Move-Item $TODO_TXT $TODO_TXT_BACKUP -Force
+        Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
     }
 
 
