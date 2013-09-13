@@ -3,6 +3,8 @@ Set-StrictMode -Version 2.0
 
 $TODO_DIR = $PSScriptRoot
 $TODO_TXT = Join-Path $TODO_DIR todo.txt
+$TODO_TXT_TEMP = Join-Path $TODO_DIR todo.txt.tmp
+$TODO_TXT_BACKUP = Join-Path $TODO_DIR todo.txt.bak
 
 
 function Write-Help {
@@ -53,6 +55,20 @@ function t {
         } | sort-object Priority | %{
             Write-Output ("{0} {1}" -f ($_.Line, $_.Todo))
         }
+    }
+
+    if($command -eq "rm") {
+        $lineCount = 0
+        Get-Content $TODO_TXT | %{
+            $lineCount++;
+            if($lineCount -ne $commandArgs[0]) {
+                $_
+            }
+        } | Out-File $TODO_TXT_TEMP -Encoding utf8
+
+        Move-Item $TODO_TXT $TODO_TXT_BACKUP -Force
+        Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
+
     }
 
 
