@@ -25,6 +25,27 @@ function t {
         $args[0] | Out-File -FilePath $TODO_TXT -Append -Encoding utf8
     }
 
+    if($command -eq "ls") {
+        $lineCount = 0;
+        Get-Content $TODO_TXT | %{
+            $lineCount++;
+            $priority = "ZZ";
+            if($_ -match "^\(([A-Z])\) ") {
+                $priority = $matches[1]
+            }
+            $todoItem = New-Object PSObject -Property @{
+                "Todo" = "$_";
+                "Priority" = $priority;
+                "Line" = $lineCount;
+            }
+
+            $todoItem
+
+        } | sort-object Priority | %{
+            Write-Output ("{0} {1}" -f ($_.Line, $_.Todo))
+        }
+    }
+
 
 }
  
