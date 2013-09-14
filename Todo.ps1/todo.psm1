@@ -16,9 +16,13 @@ function Write-Help {
 }
 
 function Create-TodoItem($todo, $number) {
-    $priority = "ZZ";
+    $priority = "ZY"
     if($_ -match $PRIORITISED_TODO_REGEX) {
         $priority = $matches[1]
+    }
+    if($_ -match $COMPLETED_TODO_REGEX) {
+        $priority = "ZZ"
+        $number = 0
     }
     $todoItem = New-Object PSObject -Property @{
         "Todo" = $todo;
@@ -131,6 +135,22 @@ function t {
     if($command -eq "ls") {
         $lineCount = 0
         Get-Content $TODO_TXT | %{ $lineCount++; $_} | ?{ $_ -notmatch $COMPLETED_TODO_REGEX } | %{
+            $todo = $_
+
+            $filtered = $commandArgs | ?{ $todo -match $_ }
+
+            if(!$commandArgs -or $filtered) {
+                Create-TodoItem $todo $lineCount
+            }
+
+        } | sort-object Priority, Line | %{
+            Write-Output ("{0} {1}" -f ($_.Line, $_.Todo))
+        }
+    }
+
+    if($command -eq "lsa") {
+        $lineCount = 0
+        Get-Content $TODO_TXT, $TODO_DONE_TXT | %{ $lineCount++; $_} | %{
             $todo = $_
 
             $filtered = $commandArgs | ?{ $todo -match $_ }
