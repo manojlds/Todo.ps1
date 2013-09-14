@@ -7,6 +7,8 @@ $TODO_DONE_TXT = Join-Path $TODO_DIR done.txt
 $TODO_TXT_TEMP = Join-Path $TODO_DIR todo.txt.tmp
 $TODO_TXT_BACKUP = Join-Path $TODO_DIR todo.txt.bak
 
+$PRIORTY_REGEX = "[A-Z]"
+$PRIORITISED_TODO_REGEX = "^\(({0})\) " -f $PRIORTY_REGEX
 $COMPLETED_TODO_REGEX = "^x \d{4}-\d{2}-\d{2} "
 
 function Write-Help {
@@ -15,7 +17,7 @@ function Write-Help {
 
 function Create-TodoItem($todo, $number) {
     $priority = "ZZ";
-    if($_ -match "^\(([A-Z])\) ") {
+    if($_ -match $PRIORITISED_TODO_REGEX) {
         $priority = $matches[1]
     }
     $todoItem = New-Object PSObject -Property @{
@@ -47,7 +49,7 @@ function t {
         Get-Content $TODO_TXT | %{ $lineCount++; $_} | ?{ $_ -notmatch $COMPLETED_TODO_REGEX } | %{
             $todo = $_
 
-            $filtered = $commandArgs | ?{ $todo -match $_; }
+            $filtered = $commandArgs | ?{ $todo -match $_ }
 
             if(!$commandArgs -or $filtered) {
                 Create-TodoItem $todo $lineCount
@@ -91,7 +93,7 @@ function t {
     if($command -eq "archive") {
         $done = @()
         Get-Content $TODO_TXT |  %{ 
-            if($_ -match "^x \d{4}-\d{2}-\d{2} ") {
+            if($_ -match $COMPLETED_TODO_REGEX) {
                 $done += $_
             } else {
                 $_
@@ -101,7 +103,7 @@ function t {
         Move-Item $TODO_TXT $TODO_TXT_BACKUP -Force
         Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
 
-        $done | Out-File $TODO_DONE_TXT -Encoding utf8
+        $done | Out-File $TODO_DONE_TXT -Encoding utf8 -Append
     }
 
     if($command -eq "dp") {
@@ -111,7 +113,7 @@ function t {
             if($lineCount -ne $commandArgs[0]) {
                 $_
             } else {
-                $_ -replace "^\([A-Z]\) ", ""
+                $_ -replace $PRIORITISED_TODO_REGEX, ""
             }
         } | Out-File $TODO_TXT_TEMP -Encoding utf8
 
@@ -120,7 +122,7 @@ function t {
     }
 
     if($command -eq "p") {
-        if($commandArgs[1] -cnotmatch "[A-Z]") {
+        if($commandArgs[1] -cnotmatch $PRIORTY_REGEX) {
             throw "PRIORITY must be anywhere from A to Z"
         }
         $lineCount = 0
@@ -129,8 +131,8 @@ function t {
             if($lineCount -ne $commandArgs[0]) {
                 $_
             } else {
-                if($_ -match "^\([A-Z]\) ") {
-                    $_ -replace "^\([A-Z]\) ", ("({0}) " -f $commandArgs[1])
+                if($_ -match $PRIORITISED_TODO_REGEX) {
+                    $_ -replace $PRIORITISED_TODO_REGEX, ("({0}) " -f $commandArgs[1])
                 } else {
                     "({0}) $_" -f $commandArgs[1]
                 }
