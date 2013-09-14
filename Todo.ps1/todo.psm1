@@ -52,6 +52,21 @@ function t {
         $commandArgs[0] | %{ Add-Todo $_ }
     }
 
+    if($command -eq "append") {
+        $lineCount = 0
+        Get-Content $TODO_TXT | %{
+            $lineCount++;
+            if($lineCount -ne $commandArgs[0]) {
+                $_
+            } else {
+                "$_ {0}" -f $commandArgs[1]
+            }
+        } | Out-File $TODO_TXT_TEMP -Encoding utf8
+
+        Move-Item $TODO_TXT $TODO_TXT_BACKUP -Force
+        Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
+    }
+
     if($command -eq "ls") {
         $lineCount = 0
         Get-Content $TODO_TXT | %{ $lineCount++; $_} | ?{ $_ -notmatch $COMPLETED_TODO_REGEX } | %{
