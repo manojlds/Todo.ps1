@@ -29,6 +29,10 @@ function Create-TodoItem($todo, $number) {
     $todoItem
 }
 
+function Add-Todo($todo) {
+    $todo | Out-File -FilePath $TODO_TXT -Append -Encoding utf8
+}
+
 function t {
     param(
         [switch] $help,
@@ -41,7 +45,11 @@ function t {
     $commandArgs = $args
 
     if($command -eq "add") {
-        $commandArgs[0] | Out-File -FilePath $TODO_TXT -Append -Encoding utf8
+        Add-Todo $commandArgs[0]
+    }
+
+    if($command -eq "addm") {
+        $commandArgs[0] | %{ Add-Todo $_ }
     }
 
     if($command -eq "ls") {
