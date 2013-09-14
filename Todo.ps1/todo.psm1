@@ -7,6 +7,8 @@ $TODO_DONE_TXT = Join-Path $TODO_DIR done.txt
 $TODO_TXT_TEMP = Join-Path $TODO_DIR todo.txt.tmp
 $TODO_TXT_BACKUP = Join-Path $TODO_DIR todo.txt.bak
 
+$COMPLETED_TODO_REGEX = "^x \d{4}-\d{2}-\d{2} "
+
 function Write-Help {
     Write-Output "todo.ps1 help"
 }
@@ -26,15 +28,15 @@ function Create-TodoItem($todo, $number) {
 }
 
 function t {
-	[CmdletBinding()]
     param(
-        [Parameter(Mandatory = 0)][switch] $help,
-        [Parameter(Position = 0, Mandatory = 0)][string] $command,
-        [Parameter(Position = 1, Mandatory = 0)][string[]] $commandArgs
+        [switch] $help,
+        [string] $command
         )
     if($help){
         Write-Help
     }
+
+    $commandArgs = $args
 
     if($command -eq "add") {
         $commandArgs[0] | Out-File -FilePath $TODO_TXT -Append -Encoding utf8
@@ -42,7 +44,7 @@ function t {
 
     if($command -eq "ls") {
         $lineCount = 0
-        Get-Content $TODO_TXT | %{ $lineCount++; $_} | ?{ $_ -notmatch "^x \d{4}-\d{2}-\d{2} " } | %{
+        Get-Content $TODO_TXT | %{ $lineCount++; $_} | ?{ $_ -notmatch $COMPLETED_TODO_REGEX } | %{
             $todo = $_
 
             $filtered = $commandArgs | ?{ $todo -match $_; }
@@ -51,7 +53,7 @@ function t {
                 Create-TodoItem $todo $lineCount
             }
 
-        } | sort-object Priority | %{
+        } | sort-object Priority, Line | %{
             Write-Output ("{0} {1}" -f ($_.Line, $_.Todo))
         }
     }
@@ -78,7 +80,7 @@ function t {
                 $_
             } else {
                 $dateDone = Get-Date
-                "x {0:yyyy-mm-dd} {1}" -f ($dateDone, $_)
+                "x {0:yyyy-MM-dd} {1}" -f ($dateDone, $_)
             }
         } | Out-File $TODO_TXT_TEMP -Encoding utf8
 
@@ -110,6 +112,28 @@ function t {
                 $_
             } else {
                 $_ -replace "^\([A-Z]\) ", ""
+            }
+        } | Out-File $TODO_TXT_TEMP -Encoding utf8
+
+        Move-Item $TODO_TXT $TODO_TXT_BACKUP -Force
+        Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
+    }
+
+    if($command -eq "p") {
+        if($commandArgs[1] -cnotmatch "[A-Z]") {
+            throw "PRIORITY must be anywhere from A to Z"
+        }
+        $lineCount = 0
+        Get-Content $TODO_TXT | %{
+            $lineCount++;
+            if($lineCount -ne $commandArgs[0]) {
+                $_
+            } else {
+                if($_ -match "^\([A-Z]\) ") {
+                    $_ -replace "^\([A-Z]\) ", ("({0}) " -f $commandArgs[1])
+                } else {
+                    "({0}) $_" -f $commandArgs[1]
+                }
             }
         } | Out-File $TODO_TXT_TEMP -Encoding utf8
 
