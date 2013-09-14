@@ -67,20 +67,20 @@ function t {
         Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
     }
 
-    if($command -eq "ls") {
-        $lineCount = 0
-        Get-Content $TODO_TXT | %{ $lineCount++; $_} | ?{ $_ -notmatch $COMPLETED_TODO_REGEX } | %{
-            $todo = $_
-
-            $filtered = $commandArgs | ?{ $todo -match $_ }
-
-            if(!$commandArgs -or $filtered) {
-                Create-TodoItem $todo $lineCount
+    if($command -eq "archive") {
+        $done = @()
+        Get-Content $TODO_TXT |  %{ 
+            if($_ -match $COMPLETED_TODO_REGEX) {
+                $done += $_
+            } else {
+                $_
             }
+        } | Out-File $TODO_TXT_TEMP -Encoding utf8
 
-        } | sort-object Priority, Line | %{
-            Write-Output ("{0} {1}" -f ($_.Line, $_.Todo))
-        }
+        Move-Item $TODO_TXT $TODO_TXT_BACKUP -Force
+        Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
+
+        $done | Out-File $TODO_DONE_TXT -Encoding utf8 -Append
     }
 
     if($command -eq "rm") {
@@ -113,22 +113,6 @@ function t {
         Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
     }
 
-    if($command -eq "archive") {
-        $done = @()
-        Get-Content $TODO_TXT |  %{ 
-            if($_ -match $COMPLETED_TODO_REGEX) {
-                $done += $_
-            } else {
-                $_
-            }
-        } | Out-File $TODO_TXT_TEMP -Encoding utf8
-
-        Move-Item $TODO_TXT $TODO_TXT_BACKUP -Force
-        Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
-
-        $done | Out-File $TODO_DONE_TXT -Encoding utf8 -Append
-    }
-
     if($command -eq "dp") {
         $lineCount = 0
         Get-Content $TODO_TXT | %{
@@ -142,6 +126,22 @@ function t {
 
         Move-Item $TODO_TXT $TODO_TXT_BACKUP -Force
         Move-Item $TODO_TXT_TEMP $TODO_TXT -Force
+    }
+
+    if($command -eq "ls") {
+        $lineCount = 0
+        Get-Content $TODO_TXT | %{ $lineCount++; $_} | ?{ $_ -notmatch $COMPLETED_TODO_REGEX } | %{
+            $todo = $_
+
+            $filtered = $commandArgs | ?{ $todo -match $_ }
+
+            if(!$commandArgs -or $filtered) {
+                Create-TodoItem $todo $lineCount
+            }
+
+        } | sort-object Priority, Line | %{
+            Write-Output ("{0} {1}" -f ($_.Line, $_.Todo))
+        }
     }
 
     if($command -eq "p") {
