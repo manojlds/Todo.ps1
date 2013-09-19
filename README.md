@@ -10,3 +10,31 @@ Installation
 ============
 
 Get the Todo.psm1 file, import the module, and done!. The `t` command should be available for you.
+
+
+Commands
+========
+
+add
+---
+
+Add a todo.  
+
+`t add "Get Milk +grocery"`
+
+
+addm
+----
+
+Add multiple todos
+
+`t addm "Get Milk +grocery","Call Mom +Family"`
+
+
+append
+------
+
+Append text to a todo. todo is identified by its number as seen in `t ls`
+
+`t append 2 "And Dad too"`
+
