@@ -22,7 +22,6 @@ Add a todo.
 
 `t add "Get Milk +grocery"`
 
-
 addm
 ----
 
@@ -30,11 +29,62 @@ Add multiple todos
 
 `t addm "Get Milk +grocery","Call Mom +Family"`
 
-
 append
 ------
 
 Append text to a todo. todo is identified by its number as seen in `t ls`
 
 `t append 2 "And Dad too"`
+
+archive
+-------
+
+Move done todos to done.txt
+
+`t archive`
+
+rm
+--
+
+Remove the specified todo
+
+`t rm 2`
+
+
+do
+--
+
+Mark a todo as done
+
+`t do 1`
+
+
+dp
+--
+
+Deprioritize the specified todo
+
+`t dp 1`
+
+ls
+--
+
+List all pending todos
+
+`t ls`
+
+
+lsa
+---
+
+List all todos, including the completed ones
+
+`t lsa`
+
+p
+-
+
+Add / replace priority of a todo.
+
+`t p 1 A`
 
