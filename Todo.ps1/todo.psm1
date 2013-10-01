@@ -59,7 +59,7 @@ function t {
     if($command -eq "append") {
         $lineCount = 0
         Get-Content $TODO_TXT | %{
-            $lineCount++;
+            $lineCount++
             if($lineCount -ne $commandArgs[0]) {
                 $_
             } else {
@@ -90,7 +90,7 @@ function t {
     if($command -eq "rm") {
         $lineCount = 0
         Get-Content $TODO_TXT | %{
-            $lineCount++;
+            $lineCount++
             if($lineCount -ne $commandArgs[0]) {
                 $_
             }
@@ -104,7 +104,7 @@ function t {
     if($command -eq "do") {
         $lineCount = 0
         Get-Content $TODO_TXT | %{
-            $lineCount++;
+            $lineCount++
             if($lineCount -ne $commandArgs[0]) {
                 $_
             } else {
@@ -120,7 +120,7 @@ function t {
     if($command -eq "dp") {
         $lineCount = 0
         Get-Content $TODO_TXT | %{
-            $lineCount++;
+            $lineCount++
             if($lineCount -ne $commandArgs[0]) {
                 $_
             } else {
@@ -170,7 +170,7 @@ function t {
         }
         $lineCount = 0
         Get-Content $TODO_TXT | %{
-            $lineCount++;
+            $lineCount++
             if($lineCount -ne $commandArgs[0]) {
                 $_
             } else {
